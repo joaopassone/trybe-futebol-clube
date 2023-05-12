@@ -28,10 +28,15 @@ describe('Testes do Fluxo de Times', () => {
     sinon
       .stub(TeamModel, "findAll")
       .resolves(mockTeams as TeamModel[]);
+
+    sinon
+      .stub(TeamModel, "findOne")
+      .resolves(mockTeams[0] as TeamModel);
   });
 
   after(() => {
     (TeamModel.findAll as sinon.SinonStub).restore();
+    (TeamModel.findOne as sinon.SinonStub).restore();
   });
 
   it('Verifica se retorna o valor correto ao buscar todos os times:', async () => {
@@ -40,6 +45,15 @@ describe('Testes do Fluxo de Times', () => {
        .get('/teams');
 
     expect(chaiHttpResponse.status).to.be.equal(200);
-    expect(chaiHttpResponse.body.teams).to.be.deep.equal(mockTeams);
+    expect(chaiHttpResponse.body).to.be.deep.equal(mockTeams);
+  });
+
+  it('Verifica se retorna o valor correto ao buscar por um time apenas:', async () => {
+    chaiHttpResponse = await chai
+       .request(app)
+       .get('/teams/1');
+
+    expect(chaiHttpResponse.status).to.be.equal(200);
+    expect(chaiHttpResponse.body).to.be.deep.equal(mockTeams[0]);
   });
 });
