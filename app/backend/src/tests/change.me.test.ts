@@ -12,7 +12,7 @@ chai.use(chaiHttp);
 
 const { expect } = chai;
 
-describe('Testes do Fluxo de Times', () => {
+describe('Testes do Fluxo de Times:', () => {
 
   let chaiHttpResponse: Response;
 
@@ -39,7 +39,7 @@ describe('Testes do Fluxo de Times', () => {
     (TeamModel.findOne as sinon.SinonStub).restore();
   });
 
-  it('Verifica se retorna o valor correto ao buscar todos os times:', async () => {
+  it('Verifica se retorna o valor correto ao buscar todos os times', async () => {
     chaiHttpResponse = await chai
        .request(app)
        .get('/teams');
@@ -48,7 +48,7 @@ describe('Testes do Fluxo de Times', () => {
     expect(chaiHttpResponse.body).to.be.deep.equal(mockTeams);
   });
 
-  it('Verifica se retorna o valor correto ao buscar por um time apenas:', async () => {
+  it('Verifica se retorna o valor correto ao buscar por um time apenas', async () => {
     chaiHttpResponse = await chai
        .request(app)
        .get('/teams/1');
