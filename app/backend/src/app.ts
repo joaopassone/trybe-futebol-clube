@@ -1,20 +1,26 @@
 import * as express from 'express';
 import TeamController from './controllers/team.controller';
+import UserController from './controllers/user.controller';
+import userLoginValidation from './middlewares/userLogin.middleware';
 
 class App {
   public app: express.Express;
-  private controller: TeamController;
+  private teamController: TeamController;
+  private userController: UserController;
 
   constructor() {
     this.app = express();
-    this.controller = new TeamController();
+    this.teamController = new TeamController();
+    this.userController = new UserController();
 
     this.config();
 
     // Não remover essa rota
     this.app.get('/', (req, res) => res.json({ ok: true }));
-    this.app.get('/teams', this.controller.getAll);
-    this.app.get('/teams/:id', this.controller.getById);
+    this.app.get('/teams', this.teamController.getAll);
+    this.app.get('/teams/:id', this.teamController.getById);
+
+    this.app.post('/login', userLoginValidation, this.userController.login);
   }
 
   private config():void {
