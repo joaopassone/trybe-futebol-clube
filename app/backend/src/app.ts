@@ -1,15 +1,19 @@
 import * as express from 'express';
+import TeamController from './controllers/team.controller';
 
 class App {
   public app: express.Express;
+  private controller: TeamController;
 
   constructor() {
     this.app = express();
+    this.controller = new TeamController();
 
     this.config();
 
     // Não remover essa rota
     this.app.get('/', (req, res) => res.json({ ok: true }));
+    this.app.get('/teams', this.controller.getAll);
   }
 
   private config():void {

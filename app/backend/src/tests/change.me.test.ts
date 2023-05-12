@@ -4,7 +4,7 @@ import * as chai from 'chai';
 import chaiHttp = require('chai-http');
 
 import { app } from '../app';
-import Team from '../database/models/TeamModel';
+import TeamModel from '../database/models/TeamModel';
 
 import { Response } from 'superagent';
 
@@ -26,12 +26,12 @@ describe('Testes do Fluxo de Times', () => {
 
   before(async () => {
     sinon
-      .stub(Team, "findAll")
-      .resolves(mockTeams as Team[]);
+      .stub(TeamModel, "findAll")
+      .resolves(mockTeams as TeamModel[]);
   });
 
   after(() => {
-    (Team.findAll as sinon.SinonStub).restore();
+    (TeamModel.findAll as sinon.SinonStub).restore();
   });
 
   it('Verifica se retorna o valor correto ao buscar todos os times:', async () => {
