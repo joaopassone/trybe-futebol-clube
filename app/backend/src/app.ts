@@ -14,6 +14,7 @@ class App {
     // Não remover essa rota
     this.app.get('/', (req, res) => res.json({ ok: true }));
     this.app.get('/teams', this.controller.getAll);
+    this.app.get('/teams/:id', this.controller.getById);
   }
 
   private config():void {
