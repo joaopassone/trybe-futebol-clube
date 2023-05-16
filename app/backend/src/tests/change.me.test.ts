@@ -8,7 +8,7 @@ import TeamModel from '../database/models/TeamModel';
 import UserModel from '../database/models/UserModel';
 
 import { Response } from 'superagent';
-const jwt = require('jsonwebtoken');
+import * as jwt from 'jsonwebtoken';
 
 chai.use(chaiHttp);
 
@@ -28,7 +28,7 @@ describe('Testes de integração', () => {
       { id: 5, teamName: 'Cruzeiro' },
     ];
 
-    before(async () => {
+    beforeEach(async () => {
       sinon
         .stub(TeamModel, "findAll")
         .resolves(mockTeams as TeamModel[]);
@@ -38,7 +38,7 @@ describe('Testes de integração', () => {
         .resolves(mockTeams[0] as TeamModel);
     });
 
-    after(() => {
+    afterEach(() => {
       (TeamModel.findAll as sinon.SinonStub).restore();
       (TeamModel.findOne as sinon.SinonStub).restore();
     });
@@ -100,16 +100,16 @@ describe('Testes de integração', () => {
 
     const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNjU0NTI3MTg5fQ.XS_9AA82iNoiVaASi0NtJpqOQ_gHSHhxrpIdigiT-fc';
 
-    before(async () => {
+    beforeEach(async () => {
       sinon
         .stub(UserModel, "findOne")
-        .resolves(mockUsers[0] as UserModel);
+        .resolves({ id: 1, ...mockUsers[0] } as UserModel);
       sinon
         .stub(jwt, "sign")
-        .resolves(mockToken);
+        .callsFake(() => mockToken);
     });
 
-    after(() => {
+    afterEach(() => {
       (UserModel.findOne as sinon.SinonStub).restore();
       (jwt.sign as sinon.SinonStub).restore();
     });
@@ -124,7 +124,7 @@ describe('Testes de integração', () => {
       expect(chaiHttpResponse.body).to.be.deep.equal({ token: mockToken });
     });
 
-    it('Verifica se retorna o resultado correto ao não informar um email', async () => {
+    it('Verifica se permite fazer login ao não informar um email', async () => {
       chaiHttpResponse = await chai
         .request(app)
         .post('/login')
@@ -134,7 +134,7 @@ describe('Testes de integração', () => {
       expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'All fields must be filled' });
     });
 
-    it('Verifica se retorna o resultado correto ao não informar uma senha', async () => {
+    it('Verifica se permite fazer login ao não informar uma senha', async () => {
       chaiHttpResponse = await chai
         .request(app)
         .post('/login')
@@ -142,6 +142,64 @@ describe('Testes de integração', () => {
 
       expect(chaiHttpResponse.status).to.be.equal(400);
       expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'All fields must be filled' });
+    });
+
+    it('Verifica se permite fazer login ao informar um email com formato inválido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/login')
+        .send({ email: '@admin.com', password: 'secret_admin' });
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Invalid email or password' });
+
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/login')
+        .send({ email: 'admin.admin.com', password: 'secret_admin' });
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Invalid email or password' });
+
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/login')
+        .send({ email: 'admin@admin', password: 'secret_admin' });
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Invalid email or password' });
+
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/login')
+        .send({ email: 'admin@.com', password: 'secret_admin' });
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Invalid email or password' });
+    });
+
+    it('Verifica se permite fazer login ao informar um email não cadastrado', async () => {
+      sinon
+        .stub(UserModel, "findOne")
+        .resolves(null);
+
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/login')
+        .send({ email: 'notadmin@admin.com', password: 'secret_admin' });
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Invalid email or password' });
+    });
+
+    it('Verifica se permite fazer login ao entrar com senha incorreta', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/login')
+        .send({ email: 'admin@admin.com', password: 'secret_notadmin' });
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Invalid email or password' });
     });
   });
 });

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { sign } from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { compareSync } from 'bcryptjs';
 import UserService from '../services/user.service';
 import UserLogin from '../interfaces/UserLogin';
@@ -13,10 +13,10 @@ class UserController {
     const userLogin: UserLogin = req.body;
     const userData = await this.service.login(userLogin);
 
-    if (!userData) return res.status(404).json();
+    if (!userData) return res.status(401).json();
 
     if (compareSync(userLogin.password, userData.password)) {
-      const token = sign(
+      const token = jwt.sign(
         {
           id: userData.id,
           username: userData.username,
