@@ -6,6 +6,7 @@ import chaiHttp = require('chai-http');
 import { app } from '../app';
 import TeamModel from '../database/models/TeamModel';
 import UserModel from '../database/models/UserModel';
+import MatchModel from '../database/models/MatchModel';
 
 import { Response } from 'superagent';
 import * as jwt from 'jsonwebtoken';
@@ -252,6 +253,62 @@ describe('Testes de integração', () => {
       expect(chaiHttpResponse.body).to.be.deep.equal({ role: 'admin' });
 
       (jwt.verify as sinon.SinonStub).restore();
+    });
+  });
+
+  describe('Testes do Fluxo de Partidas:', () => {
+
+    let chaiHttpResponse: Response;
+
+    const mockMatches = [
+      {
+        id: 1,
+        homeTeamId: 16,
+        homeTeamGoals: 1,
+        awayTeamId: 8,
+        awayTeamGoals: 1,
+        inProgress: false,
+        homeTeam: {
+          teamName: "São Paulo"
+        },
+        awayTeam: {
+          teamName: "Grêmio"
+        }
+      },
+      {
+        id: 41,
+        homeTeamId: 16,
+        homeTeamGoals: 2,
+        awayTeamId: 9,
+        awayTeamGoals: 0,
+        inProgress: true,
+        homeTeam: {
+          teamName: "São Paulo"
+        },
+       awayTeam: {
+          teamName: "Internacional"
+        }
+      }
+    ]
+
+    beforeEach(async () => {
+      sinon
+        .stub(MatchModel, "findAll")
+        .withArgs({ include: { model: TeamModel }})
+        .resolves(mockMatches as MatchModel[]);
+    });
+
+    afterEach(() => {
+      (MatchModel.findAll as sinon.SinonStub).restore();
+    });
+
+    it('Verifica se o endpoint /matches retorna todas as partidas corretamente', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/matches');
+
+      expect(chaiHttpResponse.status).to.be.equal(200);
+      expect(chaiHttpResponse.body).to.be.deep.equal(mockMatches);
     });
   });
 });

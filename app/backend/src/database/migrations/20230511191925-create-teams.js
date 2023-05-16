@@ -12,7 +12,7 @@ module.exports = {
         allowNull: false,
         field: 'team_name',
         type: Sequelize.STRING,
-      }
+      },
     });
   },
   down: async (queryInterface) => {

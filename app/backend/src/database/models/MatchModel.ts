@@ -4,10 +4,13 @@ import TeamModel from './TeamModel';
 
 class MatchModel extends Model {
   declare id: number;
-  declare username: string;
-  declare role: string;
-  declare email: string;
-  declare password: string;
+  declare homeTeamId: number;
+  declare homeTeamGoals: number;
+  declare awayTeamId: number;
+  declare awayTeamGoals: number;
+  declare inProgress: boolean;
+  declare homeTeam: { teamName: string };
+  declare awayTeam: { teamName: string };
 }
 
 MatchModel.init({
@@ -43,10 +46,9 @@ MatchModel.init({
   timestamps: false,
 });
 
-MatchModel.belongsTo(TeamModel, { foreignKey: 'homeTeamId', as: 'id' });
-MatchModel.belongsTo(TeamModel, { foreignKey: 'awayTeamId', as: 'id' });
+MatchModel.belongsTo(TeamModel, { foreignKey: 'id', as: 'teamName' });
 
-TeamModel.hasMany(MatchModel, { foreignKey: 'id', as: 'homeTeamId' });
-TeamModel.hasMany(MatchModel, { foreignKey: 'id', as: 'awayTeamId' });
+TeamModel.hasMany(MatchModel, { foreignKey: 'homeTeamId', as: 'homeTeam' });
+TeamModel.hasMany(MatchModel, { foreignKey: 'awayTeamId', as: 'awayTeam' });
 
 export default MatchModel;
