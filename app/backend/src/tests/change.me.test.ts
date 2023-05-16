@@ -180,7 +180,7 @@ describe('Testes de integração', () => {
 
     it('Verifica se permite fazer login ao informar um email não cadastrado', async () => {
       (UserModel.findOne as sinon.SinonStub).restore();
-      
+
       sinon
         .stub(UserModel, "findOne")
         .resolves(null);
@@ -212,6 +212,43 @@ describe('Testes de integração', () => {
 
       expect(chaiHttpResponse.status).to.be.equal(401);
       expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Invalid email or password' });
+    });
+
+    it('Verifica se permite acessar login/role sem um token', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/login/role')
+        .auth('authorization', '');
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Token not found' });
+    });
+
+    it('Verifica se permite acessar login/role sem um token válido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/login/role')
+        .auth('authorization', 'invalid-token');
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Token must be a valid token' });
+    });
+
+    it('Verifica se permite acessar login/role com um token válido', async () => {
+      (jwt.sign as sinon.SinonStub).restore();
+
+      const { body } = await chai
+        .request(app)
+        .get('/login')
+        .send({ email: 'admin@admin.com', password: 'secret_admin' });
+
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/login/role')
+        .auth('authorization', body.token);
+
+      expect(chaiHttpResponse.status).to.be.equal(200);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ role: 'admin' });
     });
   });
 });
