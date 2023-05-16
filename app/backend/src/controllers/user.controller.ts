@@ -13,9 +13,7 @@ class UserController {
     const userLogin: UserLogin = req.body;
     const userData = await this.service.login(userLogin);
 
-    if (!userData) return res.status(401).json();
-
-    if (compareSync(userLogin.password, userData.password)) {
+    if (userData && compareSync(userLogin.password, userData.password)) {
       const token = jwt.sign(
         {
           id: userData.id,
@@ -29,7 +27,7 @@ class UserController {
       return res.status(200).json({ token });
     }
 
-    res.status(401).json();
+    res.status(401).json({ message: 'Invalid email or password' });
   }
 }
 

@@ -179,6 +179,8 @@ describe('Testes de integração', () => {
     });
 
     it('Verifica se permite fazer login ao informar um email não cadastrado', async () => {
+      (UserModel.findOne as sinon.SinonStub).restore();
+      
       sinon
         .stub(UserModel, "findOne")
         .resolves(null);
@@ -197,6 +199,16 @@ describe('Testes de integração', () => {
         .request(app)
         .post('/login')
         .send({ email: 'admin@admin.com', password: 'secret_notadmin' });
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Invalid email or password' });
+    });
+
+    it('Verifica se permite fazer login ao entrar com senha inválida', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/login')
+        .send({ email: 'admin@admin.com', password: '12345' });
 
       expect(chaiHttpResponse.status).to.be.equal(401);
       expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Invalid email or password' });
