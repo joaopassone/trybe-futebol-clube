@@ -217,8 +217,7 @@ describe('Testes de integração', () => {
     it('Verifica se permite acessar login/role sem um token', async () => {
       chaiHttpResponse = await chai
         .request(app)
-        .get('/login/role')
-        .auth('authorization', '');
+        .get('/login/role');
 
       expect(chaiHttpResponse.status).to.be.equal(401);
       expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Token not found' });
@@ -235,20 +234,24 @@ describe('Testes de integração', () => {
     });
 
     it('Verifica se permite acessar login/role com um token válido', async () => {
-      (jwt.sign as sinon.SinonStub).restore();
+      sinon
+        .stub(jwt, "verify")
+        .callsFake(() => true);
 
       const { body } = await chai
         .request(app)
-        .get('/login')
+        .post('/login')
         .send({ email: 'admin@admin.com', password: 'secret_admin' });
 
       chaiHttpResponse = await chai
         .request(app)
         .get('/login/role')
-        .auth('authorization', body.token);
+        .set('authorization', body.token);
 
       expect(chaiHttpResponse.status).to.be.equal(200);
       expect(chaiHttpResponse.body).to.be.deep.equal({ role: 'admin' });
+
+      (jwt.verify as sinon.SinonStub).restore();
     });
   });
 });

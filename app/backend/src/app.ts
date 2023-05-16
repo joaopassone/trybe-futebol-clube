@@ -2,6 +2,7 @@ import * as express from 'express';
 import TeamController from './controllers/team.controller';
 import UserController from './controllers/user.controller';
 import userLoginValidation from './middlewares/userLogin.middleware';
+import tokenValidation from './middlewares/tokenValidation.middleware';
 
 class App {
   public app: express.Express;
@@ -21,6 +22,7 @@ class App {
     this.app.get('/teams/:id', this.teamController.getById);
 
     this.app.post('/login', userLoginValidation, this.userController.login);
+    this.app.get('/login/role', tokenValidation);
   }
 
   private config():void {
