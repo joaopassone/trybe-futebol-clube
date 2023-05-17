@@ -6,8 +6,9 @@ class MatchController {
     this.getAllMatches = this.getAllMatches.bind(this);
   }
 
-  async getAllMatches(_req: Request, res: Response): Promise<void> {
-    const matches = await this.service.getAllMatches();
+  async getAllMatches(req: Request, res: Response): Promise<void> {
+    const { query } = req;
+    const matches = await this.service.getAllMatches(query);
     res.status(200).json(matches);
   }
 }

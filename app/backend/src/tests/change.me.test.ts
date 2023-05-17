@@ -29,7 +29,7 @@ describe('Testes de integração', () => {
       { id: 5, teamName: 'Cruzeiro' },
     ];
 
-    beforeEach(async () => {
+    before(async () => {
       sinon
         .stub(TeamModel, "findAll")
         .resolves(mockTeams as TeamModel[]);
@@ -39,7 +39,7 @@ describe('Testes de integração', () => {
         .resolves(mockTeams[0] as TeamModel);
     });
 
-    afterEach(() => {
+    after(() => {
       (TeamModel.findAll as sinon.SinonStub).restore();
       (TeamModel.findOne as sinon.SinonStub).restore();
     });
@@ -101,7 +101,7 @@ describe('Testes de integração', () => {
 
     const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNjU0NTI3MTg5fQ.XS_9AA82iNoiVaASi0NtJpqOQ_gHSHhxrpIdigiT-fc';
 
-    beforeEach(async () => {
+    before(async () => {
       sinon
         .stub(UserModel, "findOne")
         .resolves({ id: 1, ...mockUsers[0] } as UserModel);
@@ -110,7 +110,7 @@ describe('Testes de integração', () => {
         .callsFake(() => mockToken);
     });
 
-    afterEach(() => {
+    after(() => {
       (UserModel.findOne as sinon.SinonStub).restore();
       (jwt.sign as sinon.SinonStub).restore();
     });
@@ -289,16 +289,15 @@ describe('Testes de integração', () => {
           teamName: "Internacional"
         }
       }
-    ]
+    ];
 
-    beforeEach(async () => {
+    before(() => {
       sinon
         .stub(MatchModel, "findAll")
-        .withArgs({ include: { model: TeamModel }})
         .resolves(mockMatches as MatchModel[]);
     });
 
-    afterEach(() => {
+    after(() => {
       (MatchModel.findAll as sinon.SinonStub).restore();
     });
 
@@ -309,6 +308,22 @@ describe('Testes de integração', () => {
 
       expect(chaiHttpResponse.status).to.be.equal(200);
       expect(chaiHttpResponse.body).to.be.deep.equal(mockMatches);
+    });
+
+    it('Verifica se o endpoint /matches retorna as partidas filtradas por inProgress corretamente', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/matches?inProgress=true');
+
+      expect(chaiHttpResponse.status).to.be.equal(200);
+      expect(chaiHttpResponse.body).to.be.deep.equal([mockMatches[1]]);
+
+      chaiHttpResponse = await chai
+        .request(app)
+        .get('/matches?inProgress=false');
+
+      expect(chaiHttpResponse.status).to.be.equal(200);
+      expect(chaiHttpResponse.body).to.be.deep.equal([mockMatches[0]]);
     });
   });
 });
