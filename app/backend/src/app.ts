@@ -3,16 +3,19 @@ import TeamController from './controllers/team.controller';
 import UserController from './controllers/user.controller';
 import userLoginValidation from './middlewares/userLogin.middleware';
 import tokenValidation from './middlewares/tokenValidation.middleware';
+import MatchController from './controllers/match.controller';
 
 class App {
   public app: express.Express;
   private teamController: TeamController;
   private userController: UserController;
+  private matchController: MatchController;
 
   constructor() {
     this.app = express();
     this.teamController = new TeamController();
     this.userController = new UserController();
+    this.matchController = new MatchController();
 
     this.config();
 
@@ -23,6 +26,8 @@ class App {
 
     this.app.post('/login', userLoginValidation, this.userController.login);
     this.app.get('/login/role', tokenValidation);
+
+    this.app.get('/matches', this.matchController.getAllMatches);
   }
 
   private config():void {
