@@ -28,6 +28,7 @@ class App {
     this.app.get('/login/role', tokenValidation);
 
     this.app.get('/matches', this.matchController.getAllMatches);
+    this.app.patch('/matches/:id/finish', tokenValidation, this.matchController.finishMatch);
   }
 
   private config():void {

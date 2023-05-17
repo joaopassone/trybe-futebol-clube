@@ -235,6 +235,12 @@ describe('Testes de integração', () => {
     });
 
     it('Verifica se permite acessar login/role com um token válido', async () => {
+      (UserModel.findOne as sinon.SinonStub).restore();
+
+      sinon
+        .stub(UserModel, "findOne")
+        .resolves(mockUsers[0] as UserModel);
+
       sinon
         .stub(jwt, "verify")
         .callsFake(() => true);
@@ -291,26 +297,26 @@ describe('Testes de integração', () => {
       }
     ];
 
-    before(() => {
+    it('Verifica se o endpoint /matches retorna todas as partidas corretamente', async () => {
       sinon
         .stub(MatchModel, "findAll")
         .resolves(mockMatches as MatchModel[]);
-    });
 
-    after(() => {
-      (MatchModel.findAll as sinon.SinonStub).restore();
-    });
-
-    it('Verifica se o endpoint /matches retorna todas as partidas corretamente', async () => {
       chaiHttpResponse = await chai
         .request(app)
         .get('/matches');
 
       expect(chaiHttpResponse.status).to.be.equal(200);
       expect(chaiHttpResponse.body).to.be.deep.equal(mockMatches);
+
+      (MatchModel.findAll as sinon.SinonStub).restore();
     });
 
     it('Verifica se o endpoint /matches retorna as partidas filtradas por inProgress corretamente', async () => {
+      sinon
+        .stub(MatchModel, "findAll")
+        .resolves([mockMatches[1]] as MatchModel[]);
+
       chaiHttpResponse = await chai
         .request(app)
         .get('/matches?inProgress=true');
@@ -318,12 +324,91 @@ describe('Testes de integração', () => {
       expect(chaiHttpResponse.status).to.be.equal(200);
       expect(chaiHttpResponse.body).to.be.deep.equal([mockMatches[1]]);
 
+      (MatchModel.findAll as sinon.SinonStub).restore();
+
+      sinon
+        .stub(MatchModel, "findAll")
+        .resolves([mockMatches[0]] as MatchModel[]);
+
       chaiHttpResponse = await chai
         .request(app)
         .get('/matches?inProgress=false');
 
       expect(chaiHttpResponse.status).to.be.equal(200);
       expect(chaiHttpResponse.body).to.be.deep.equal([mockMatches[0]]);
+
+      (MatchModel.findAll as sinon.SinonStub).restore();
+    });
+
+    it('Verifica se permite finalizar partida sem um token', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .patch('/matches/41/finish');
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Token not found' });
+    });
+
+    it('Verifica se permite finalizar partida com um token inválido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .patch('/matches/41/finish')
+        .set('authorization', 'invalid-token');
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Token must be a valid token' });
+    });
+
+    it('Verifica se permite finalizar partida com um token válido', async () => {
+      sinon
+        .stub(jwt, "verify")
+        .callsFake(() => true);
+
+      chaiHttpResponse = await chai
+        .request(app)
+        .patch('/matches/41/finish')
+        .set('authorization', 'valid-token');
+
+      expect(chaiHttpResponse.status).to.be.equal(200);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Finished' });
+
+      (jwt.verify as sinon.SinonStub).restore();
+    });
+
+    it('Verifica se permite atualizar partida em andamento sem um token', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .patch('/matches/41');
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Token not found' });
+    });
+
+    it('Verifica se permite atualizar partida em andamento com um token inválido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .patch('/matches/41')
+        .set('authorization', 'invalid-token');
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Token must be a valid token' });
+    });
+
+    it('Verifica se permite atualizar partida em andamanento com um token válido', async () => {
+      sinon
+        .stub(jwt, "verify")
+        .callsFake(() => true);
+
+      chaiHttpResponse = await chai
+        .request(app)
+        .patch('/matches/41')
+        .send({ homeTeamGoals: 3, awayTeamGoals: 0 })
+        .set('authorization', 'valid-token');
+
+      expect(chaiHttpResponse.status).to.be.equal(200);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Match updated' });
+
+      (jwt.verify as sinon.SinonStub).restore();
     });
   });
 });

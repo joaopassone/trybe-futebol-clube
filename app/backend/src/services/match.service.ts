@@ -23,6 +23,14 @@ class MatchService {
       },
     );
   }
+
+  async finishMatch(id: number) {
+    return this.model.update({
+      inProgress: false,
+    }, {
+      where: { id },
+    });
+  }
 }
 
 export default MatchService;
