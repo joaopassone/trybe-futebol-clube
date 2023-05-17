@@ -1,37 +1,28 @@
 import * as express from 'express';
-import TeamController from './controllers/team.controller';
-import UserController from './controllers/user.controller';
-import userLoginValidation from './middlewares/userLogin.middleware';
-import tokenValidation from './middlewares/tokenValidation.middleware';
-import MatchController from './controllers/match.controller';
+import TeamRouter from './routers/teams.router';
+import UserRouter from './routers/user.router';
+import MatchRouter from './routers/match.router';
 
 class App {
   public app: express.Express;
-  private teamController: TeamController;
-  private userController: UserController;
-  private matchController: MatchController;
+  private teamRouter: TeamRouter;
+  private userRouter: UserRouter;
+  private matchRouter: MatchRouter;
 
   constructor() {
     this.app = express();
-    this.teamController = new TeamController();
-    this.userController = new UserController();
-    this.matchController = new MatchController();
+    this.teamRouter = new TeamRouter();
+    this.userRouter = new UserRouter();
+    this.matchRouter = new MatchRouter();
 
     this.config();
 
     // Não remover essa rota
     this.app.get('/', (req, res) => res.json({ ok: true }));
 
-    this.app.get('/teams', this.teamController.getAll);
-    this.app.get('/teams/:id', this.teamController.getById);
-
-    this.app.post('/login', userLoginValidation, this.userController.login);
-    this.app.get('/login/role', tokenValidation);
-
-    this.app.get('/matches', this.matchController.getAllMatches);
-    this.app.patch('/matches/:id/finish', tokenValidation, this.matchController.finishMatch);
-    this.app.patch('/matches/:id', tokenValidation, this.matchController.updateMatch);
-    this.app.post('/matches', tokenValidation, this.matchController.createNewMatch);
+    this.app.use('/teams', this.teamRouter.router);
+    this.app.use('/login', this.userRouter.router);
+    this.app.use('/matches', this.matchRouter.router);
   }
 
   private config():void {
