@@ -31,6 +31,16 @@ class MatchService {
       where: { id },
     });
   }
+
+  async updateMatch(id: number, body: { homeTeamGoals: number, awayTeamGoals: number }) {
+    const { homeTeamGoals, awayTeamGoals } = body;
+    return this.model.update({
+      homeTeamGoals,
+      awayTeamGoals,
+    }, {
+      where: { id },
+    });
+  }
 }
 
 export default MatchService;

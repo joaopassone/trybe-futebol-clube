@@ -29,6 +29,7 @@ class App {
 
     this.app.get('/matches', this.matchController.getAllMatches);
     this.app.patch('/matches/:id/finish', tokenValidation, this.matchController.finishMatch);
+    this.app.patch('/matches/:id', tokenValidation, this.matchController.updateMatch);
   }
 
   private config():void {
