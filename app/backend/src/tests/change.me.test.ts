@@ -410,5 +410,96 @@ describe('Testes de integração', () => {
 
       (jwt.verify as sinon.SinonStub).restore();
     });
+
+    const newMatch = {
+      homeTeamId: 16,
+      awayTeamId: 8,
+      homeTeamGoals: 2,
+      awayTeamGoals: 2,
+    };
+
+    const sameTeamMatch = {
+      homeTeamId: 16,
+      awayTeamId: 16,
+      homeTeamGoals: 2,
+      awayTeamGoals: 2,
+    };
+
+    const invalidTeamMatch = {
+      homeTeamId: 456,
+      awayTeamId: 16,
+      homeTeamGoals: 2,
+      awayTeamGoals: 2,
+    };
+
+    before(async () => {
+      sinon
+        .stub(MatchModel, "create")
+        .resolves({ id: 1, ...newMatch, inProgress: true } as MatchModel);
+    });
+
+    after(() => {
+      (MatchModel.create as sinon.SinonStub).restore();
+    });
+
+    it('Verifica se o endpoint /matches permite cadastrar uma nova partida em andamento sem um token', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/matches')
+        .send(newMatch);
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Token not found' });
+    });
+
+    it('Verifica se o endpoint /matches permite cadastrar uma nova partida em andamento com um token inválido', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/matches')
+        .send(newMatch)
+        .set('authorization', 'invalid-token');
+
+      expect(chaiHttpResponse.status).to.be.equal(401);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'Token must be a valid token' });
+    });
+
+    it('Verifica se o endpoint /matches permite cadastrar uma nova partida em andamento com um token válido', async () => {
+      sinon
+        .stub(jwt, "verify")
+        .callsFake(() => true);
+
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/matches')
+        .send(newMatch)
+        .set('authorization', 'valid-token');;
+
+      expect(chaiHttpResponse.status).to.be.equal(201);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ id: 1, ...newMatch, inProgress: true });
+    });
+
+    it('Verifica se o endpoint /matches permite cadastrar uma nova partida em andamento com 2 times iguais', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/matches')
+        .send(sameTeamMatch)
+        .set('authorization', 'valid-token');;
+
+      expect(chaiHttpResponse.status).to.be.equal(422);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ message: 'It is not possible to create a match with two equal teams' });
+    });
+
+    it('Verifica se o endpoint /matches permite cadastrar uma nova partida em andamento com um time inexistente', async () => {
+      chaiHttpResponse = await chai
+        .request(app)
+        .post('/matches')
+        .send(invalidTeamMatch)
+        .set('authorization', 'valid-token');;
+
+      expect(chaiHttpResponse.status).to.be.equal(404);
+      expect(chaiHttpResponse.body).to.be.deep.equal({ "message": "There is no team with such id!" });
+
+      (jwt.verify as sinon.SinonStub).restore();
+    });
   });
 });
