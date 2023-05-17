@@ -2,6 +2,13 @@ import QueryString = require('qs');
 import TeamModel from '../database/models/TeamModel';
 import MatchModel from '../database/models/MatchModel';
 
+interface newMatch {
+  homeTeamId: number,
+  awayTeamId: number,
+  homeTeamGoals: number,
+  awayTeamGoals: number,
+}
+
 class MatchService {
   constructor(public model = MatchModel) {}
 
@@ -40,6 +47,10 @@ class MatchService {
     }, {
       where: { id },
     });
+  }
+
+  async createNewMatch(newMatch: newMatch) {
+    return this.model.create({ ...newMatch, inProgress: true });
   }
 }
 

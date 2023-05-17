@@ -21,6 +21,7 @@ class App {
 
     // Não remover essa rota
     this.app.get('/', (req, res) => res.json({ ok: true }));
+
     this.app.get('/teams', this.teamController.getAll);
     this.app.get('/teams/:id', this.teamController.getById);
 
@@ -30,6 +31,7 @@ class App {
     this.app.get('/matches', this.matchController.getAllMatches);
     this.app.patch('/matches/:id/finish', tokenValidation, this.matchController.finishMatch);
     this.app.patch('/matches/:id', tokenValidation, this.matchController.updateMatch);
+    this.app.post('/matches', tokenValidation, this.matchController.createNewMatch);
   }
 
   private config():void {
