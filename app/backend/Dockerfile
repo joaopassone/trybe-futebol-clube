@@ -8,12 +8,12 @@ COPY package*.json ./
 RUN npm install
 # Copiar o restante dos arquivos da aplicação para o container
 COPY src src
-COPY .dockerignore .
+COPY .dockerignore ./
 COPY .eslint* ./
-COPY .sequelizerc .
-COPY nyc.config.js .
-COPY packages.npm .
-COPY tsconfig.json .
+COPY .sequelizerc ./
+COPY nyc.config.js ./
+COPY packages.npm ./
+COPY tsconfig.json ./
 # Sinalize que aplicação expõe a porta 3001
 EXPOSE 3001
 # Configurar os comandos para iniciar a aplicação de acordo com as boas práticas
