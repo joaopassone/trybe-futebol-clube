@@ -2,18 +2,21 @@ import * as express from 'express';
 import TeamRouter from './routers/teams.router';
 import UserRouter from './routers/user.router';
 import MatchRouter from './routers/match.router';
+import LeaderboardRouter from './routers/leaderboard.router';
 
 class App {
   public app: express.Express;
   private teamRouter: TeamRouter;
   private userRouter: UserRouter;
   private matchRouter: MatchRouter;
+  private leaderboardRouter: LeaderboardRouter;
 
   constructor() {
     this.app = express();
     this.teamRouter = new TeamRouter();
     this.userRouter = new UserRouter();
     this.matchRouter = new MatchRouter();
+    this.leaderboardRouter = new LeaderboardRouter();
 
     this.config();
 
@@ -23,6 +26,7 @@ class App {
     this.app.use('/teams', this.teamRouter.router);
     this.app.use('/login', this.userRouter.router);
     this.app.use('/matches', this.matchRouter.router);
+    this.app.use('/leaderboard', this.leaderboardRouter.router);
   }
 
   private config():void {
