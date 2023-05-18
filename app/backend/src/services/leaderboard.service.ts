@@ -6,7 +6,7 @@ import MatchModel from '../database/models/MatchModel';
 class LeaderboardService {
   constructor(public sequelize = Sequelize, public matchModel = MatchModel) {}
 
-  async getLeaderboard() {
+  async getHomeLeaderboard() {
     return this.sequelize.query(getLeaderboard, { type: QueryTypes.SELECT });
   }
 }

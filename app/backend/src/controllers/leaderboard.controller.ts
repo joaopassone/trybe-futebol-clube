@@ -3,11 +3,11 @@ import LeaderboardService from '../services/leaderboard.service';
 
 class LeaderboardController {
   constructor(public service = new LeaderboardService()) {
-    this.getLeaderboard = this.getLeaderboard.bind(this);
+    this.getHomeLeaderboard = this.getHomeLeaderboard.bind(this);
   }
 
-  async getLeaderboard(_req: Request, res: Response): Promise<void> {
-    const leaderboard = await this.service.getLeaderboard();
+  async getHomeLeaderboard(_req: Request, res: Response): Promise<void> {
+    const leaderboard = await this.service.getHomeLeaderboard();
     res.status(200).json(leaderboard);
   }
 }
