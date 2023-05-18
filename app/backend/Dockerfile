@@ -9,7 +9,7 @@ RUN npm install
 # Copiar o restante dos arquivos da aplicação para o container
 COPY src src
 COPY .dockerignore .
-COPY .eslint* .
+COPY .eslint* ./
 COPY .sequelizerc .
 COPY nyc.config.js .
 COPY packages.npm .
