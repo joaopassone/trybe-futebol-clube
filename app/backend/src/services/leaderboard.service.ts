@@ -1,13 +1,18 @@
 import { QueryTypes } from 'sequelize';
 import Sequelize from '../database/models';
-import getLeaderboard from '../literals/getLeaderboard.home';
+import getHomeLeaderboard from '../literals/getLeaderboard.home';
+import getAwayLeaderboard from '../literals/getLeaderboard.away';
 import MatchModel from '../database/models/MatchModel';
 
 class LeaderboardService {
   constructor(public sequelize = Sequelize, public matchModel = MatchModel) {}
 
   async getHomeLeaderboard() {
-    return this.sequelize.query(getLeaderboard, { type: QueryTypes.SELECT });
+    return this.sequelize.query(getHomeLeaderboard, { type: QueryTypes.SELECT });
+  }
+
+  async getAwayLeaderboard() {
+    return this.sequelize.query(getAwayLeaderboard, { type: QueryTypes.SELECT });
   }
 }
 

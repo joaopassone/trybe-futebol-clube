@@ -10,5 +10,6 @@ export default class LeaderboardRouter {
     this.controller = new LeaderboardController();
 
     this.router.get('/home', this.controller.getHomeLeaderboard);
+    this.router.get('/away', this.controller.getAwayLeaderboard);
   }
 }
