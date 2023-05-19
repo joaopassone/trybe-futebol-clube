@@ -1,0 +1,8 @@
+bcryptjs
+cors
+express
+express-async-errors
+jest
+jsonwebtoken
+mysql2
+sequelize
